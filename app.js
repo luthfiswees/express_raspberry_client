@@ -67,7 +67,7 @@ module.exports = app;
 // Made for raspberry pi
 
 // Cron job for fetching servo status
-new CronJob('*/5 * * * * *', function() {
+new CronJob('*/30 * * * * *', function() {
 
   var options = {
     method: 'POST',
@@ -100,7 +100,7 @@ new CronJob('0 */1 * * * *', function() {
         uri: process.env.SYSPROG_API_URL + "store_forecast",
         form: {
             category: "forecast",
-            content: JSON.stringify(weather)
+            forecast: JSON.stringify(weather.currently.summary)
         },
         headers: {
             'content-type': 'application/x-www-form-urlencoded' // Set automatically
