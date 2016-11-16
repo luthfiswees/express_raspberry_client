@@ -66,8 +66,12 @@ module.exports = app;
 // List of cron jobs
 // Made for raspberry pi
 
+var exec = require('child_process').exec;
+var nyalain = "/home/pi/jemuran_raspberry_client/bash_operations/turn_on.sh";
+var matiin  = "/home/pi/jemuran_raspberry_client/bash_operations/turn_off.sh";
+
 // Cron job for fetching servo status
-new CronJob('*/30 * * * * *', function() {
+new CronJob('*/2 * * * * *', function() {
 
   var options = {
     method: 'POST',
@@ -80,7 +84,21 @@ new CronJob('*/30 * * * * *', function() {
 
   rp(options)
     .then(function (parsedBody) {
-        console.log(parsedBody);
+        if(parsedBody.status === "true"){
+	  exec(nyalain, function(error, stdout, stderr) {
+            console.log("nyala");
+	    if (error) {
+	      console.log(error);
+	    }
+          });
+        }else {
+	  exec(matiin, function(error, stdout, stderr) {
+ 	    console.log("mati");
+	    if (error) {
+	      console.log(error);
+	    }
+          });
+        }
     })
     .catch(function (err) {
         // POST failed...
@@ -89,7 +107,7 @@ new CronJob('*/30 * * * * *', function() {
 }, null, true, 'America/Los_Angeles');
 
 // Cron job for sending forecast information
-new CronJob('0 */1 * * * *', function() {
+new CronJob('0 */3 * * * *', function() {
 
   forecast.get([latitude, longitude], function(err, weather) {
     if(err) return console.dir(err);
