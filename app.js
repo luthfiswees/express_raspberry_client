@@ -67,8 +67,8 @@ module.exports = app;
 // Made for raspberry pi
 
 var exec = require('child_process').exec;
-var nyalain = "/home/pi/jemuran_raspberry_client/bash_operations/turn_on.sh";
-var matiin  = "/home/pi/jemuran_raspberry_client/bash_operations/turn_off.sh";
+var nyalain = __dirname + "/bash_operations/turn_on.sh";
+var matiin  = __dirname + "/bash_operations/turn_off.sh";
 
 // Cron job for fetching servo status
 new CronJob('*/2 * * * * *', function() {
@@ -85,19 +85,19 @@ new CronJob('*/2 * * * * *', function() {
   rp(options)
     .then(function (parsedBody) {
         if(parsedBody.status === "true"){
-	  exec(nyalain, function(error, stdout, stderr) {
+	          exec(nyalain, function(error, stdout, stderr) {
             console.log("nyala");
-	    if (error) {
-	      console.log(error);
-	    }
-          });
+	          if (error) {
+	             console.log(error);
+	          }
+            });
         }else {
-	  exec(matiin, function(error, stdout, stderr) {
- 	    console.log("mati");
-	    if (error) {
-	      console.log(error);
-	    }
-          });
+	         exec(matiin, function(error, stdout, stderr) {
+ 	         console.log("mati");
+	         if (error) {
+	            console.log(error);
+	         }
+           });
         }
     })
     .catch(function (err) {
