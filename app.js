@@ -102,6 +102,7 @@ new CronJob('*/2 * * * * *', function() {
     })
     .catch(function (err) {
         // POST failed...
+        console.log("There's no connection");
     });
 
 }, null, true, 'America/Los_Angeles');
@@ -132,6 +133,7 @@ new CronJob('0 */3 * * * *', function() {
       })
       .catch(function (err) {
           // POST failed...
+          console.log("There's no connection");
       });
 
   });
