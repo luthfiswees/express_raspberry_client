@@ -12,6 +12,9 @@ var app = express();
 
 // module needed by LuthfiKP
 global.dirname = __dirname;
+global.status_file = __dirname + "/information_storage/status.txt";
+global.forecast_file = __dirname + "/information_storage/forecast.txt";
+var filesystem = require('fs');
 var latitude = -6.3608;
 var longitude = 106.8317;
 var CronJob = require('cron').CronJob;
@@ -74,37 +77,28 @@ var matiin  = __dirname + "/bash_operations/turn_off.sh";
 // Cron job for fetching servo status
 new CronJob('*/2 * * * * *', function() {
 
-  var options = {
-    method: 'POST',
-    uri: process.env.SYSPROG_API_URL + "fetch_status",
-    body: {
-        some: 'payload'
-    },
-    json: true // Automatically stringifies the body to JSON
-  };
-
-  rp(options)
-    .then(function (parsedBody) {
-        if(parsedBody.status === "true"){
-	          exec(nyalain, function(error, stdout, stderr) {
-            console.log("nyala");
-	          if (error) {
-	             console.log(error);
-	          }
-            });
-        }else {
-	         exec(matiin, function(error, stdout, stderr) {
- 	         console.log("mati");
-	         if (error) {
-	            console.log(error);
-	         }
-           });
-        }
-    })
-    .catch(function (err) {
-        // POST failed...
-        console.log("There's no connection");
-    });
+  filesystem.readFile( global.status_file, 'utf8', function(err, data) {
+    if (err){
+      res.json({error: true, notification: "file hasn't been initialized"});
+      console.dir(err);
+    }else{
+      if(data === "true"){
+          exec(nyalain, function(error, stdout, stderr) {
+          console.log("nyala");
+          if (error) {
+             console.log(error);
+          }
+          });
+      }else {
+         exec(matiin, function(error, stdout, stderr) {
+         console.log("mati");
+         if (error) {
+            console.log(error);
+         }
+         });
+      }
+    }
+  });
 
 }, null, true, 'America/Los_Angeles');
 

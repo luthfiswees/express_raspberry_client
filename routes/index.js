@@ -8,7 +8,7 @@ router.get('/', function(req, res, next) {
 });
 
 router.post('/get_status', function(req, res, next){
-  filesystem.readFile( global.dirname + "/information_storage/status.txt", 'utf8', function(err, data) {
+  filesystem.readFile( global.status_file, 'utf8', function(err, data) {
     if (err){
       res.json({error: true, notification: "file hasn't been initialized"});
       console.dir(err);
@@ -20,7 +20,7 @@ router.post('/get_status', function(req, res, next){
 });
 
 router.post('/set_status', function(req, res, next){
-  filesystem.writeFile( global.dirname + "/information_storage/status.txt", req.body.status, function(err){
+  filesystem.writeFile( global.status_file, req.body.status, function(err){
     if (err){
       res.json({error: true, notification: "file corrupt"});
       console.dir(err);
@@ -32,7 +32,7 @@ router.post('/set_status', function(req, res, next){
 });
 
 router.post('/get_forecast', function(req, res, next){
-  filesystem.readFile( global.dirname + "/information_storage/forecast.txt", 'utf8', function(err, data) {
+  filesystem.readFile( global.forecast_file, 'utf8', function(err, data) {
     if (err){
       res.json({error: true, notification: "file hasn't been initialized"});
       console.dir(err);
@@ -44,7 +44,7 @@ router.post('/get_forecast', function(req, res, next){
 });
 
 router.post('/set_forecast', function(req, res, next){
-  filesystem.writeFile( global.dirname + "/information_storage/forecast.txt", req.body.forecast, function(err){
+  filesystem.writeFile( global.forecast_file, req.body.forecast, function(err){
     if (err){
       res.json({error: true, notification: "file corrupt"});
       console.dir(err);
