@@ -11,6 +11,7 @@ var users = require('./routes/users');
 var app = express();
 
 // module needed by LuthfiKP
+global.dirname = __dirname;
 var latitude = -6.3608;
 var longitude = 106.8317;
 var CronJob = require('cron').CronJob;
