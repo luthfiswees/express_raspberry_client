@@ -14,22 +14,16 @@ var app = express();
 global.dirname = __dirname;
 global.status_file = __dirname + "/information_storage/status.txt";
 global.forecast_file = __dirname + "/information_storage/forecast.txt";
+global.light_sensor_file = process.env.LIGHT_SENSOR_FILE;
+global.ultrasonic_sensor_file = process.env.ULTRASONIC_SENSOR_FILE;
+global.light_sensor_value = 100;
+global.ultrasonic_sensor_value = 100;
+global.light_sensor_threshold = 50;
+global.ultrasonic_sensor_threshold = 20;
+
 var filesystem = require('fs');
-var latitude = -6.3608;
-var longitude = 106.8317;
 var CronJob = require('cron').CronJob;
-var Forecast = require('forecast');
-var rp = require('request-promise');
-var forecast = new Forecast({
-  service: 'darksky',
-  key: process.env.DARKSKY_API_KEY,
-  units: 'celcius',
-  cache: true,      // Cache API requests
-  ttl: {            // How long to cache requests. Uses syntax from moment.js: http://momentjs.com/docs/#/durations/creating/
-    minutes: 27,
-    seconds: 45
-  }
-});
+var S = require('string');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -84,14 +78,14 @@ new CronJob('*/2 * * * * *', function() {
     }else{
       if(data === "true"){
           exec(nyalain, function(error, stdout, stderr) {
-          console.log("nyala");
+          console.log("masuk");
           if (error) {
              console.log(error);
           }
           });
       }else {
          exec(matiin, function(error, stdout, stderr) {
-         console.log("mati");
+         console.log("keluar");
          if (error) {
             console.log(error);
          }
@@ -102,35 +96,97 @@ new CronJob('*/2 * * * * *', function() {
 
 }, null, true, 'America/Los_Angeles');
 
-// Cron job for sending forecast information
-new CronJob('0 */3 * * * *', function() {
+// Cron job for updating forecast information
+new CronJob('*/3 * * * * *', function() {
 
-  forecast.get([latitude, longitude], function(err, weather) {
-    if(err) return console.dir(err);
-    console.log(weather.currently.summary);
+  filesystem.readFile(global.light_sensor_file, 'utf8', function (err,data) {
+  if (err) {
+    return console.log(err);
+  }
+  else{
+    global.light_sensor_value = parseInt(data);
 
-    var options = {
-        method: 'POST',
-        uri: process.env.SYSPROG_API_URL + "store_forecast",
-        form: {
-            category: "forecast",
-            forecast: JSON.stringify(weather.currently.summary)
-        },
-        headers: {
-            'content-type': 'application/x-www-form-urlencoded' // Set automatically
-        },
-        json: true
-    };
+    filesystem.readFile(global.ultrasonic_sensor_file, 'utf8', function (err,datas) {
+    if (err) {
+      return console.log(err);
+    }
+    else{
+      global.ultrasonic_sensor_value = parseInt(datas);
+      console.log('Light sensor value : ' + global.light_sensor_value + ',  Ultrasonic sensor value : ' + datas );
+    }});
+  }});
 
-    rp(options)
-      .then(function (parsedBody) {
-          console.log(parsedBody);
-      })
-      .catch(function (err) {
-          // POST failed...
-          console.log("There's no connection");
-      });
+}, null, true, 'America/Los_Angeles');
 
+// Cron job for updating forecast status automatically
+new CronJob('*/4 * * * * *', function() {
+
+  if (light_sensor_value < light_sensor_threshold){
+    if (ultrasonic_sensor_value < ultrasonic_sensor_threshold){
+	filesystem.writeFile(global.forecast_file, 'Hard Rain', function (err) {
+   	  if (err) {
+	    console.log(err);
+	  }else{
+	    console.log('Forecast updated to Hard Rain');
+	  }
+	});
+    }else{
+	filesystem.writeFile(global.forecast_file, 'Cloudy', function (err) {
+          if (err) {                       
+            console.log(err);
+          }else{ 
+            console.log('Forecast updated to Cloudy');
+          }
+        });
+    }
+  }else{
+    if (ultrasonic_sensor_value < ultrasonic_sensor_threshold){ 
+	filesystem.writeFile(global.forecast_file, 'Light Rain', function (err) {
+          if (err) {                       
+            console.log(err);
+          }else{ 
+            console.log('Forecast updated to Light Rain');
+          }
+        });
+    }else{ 
+	filesystem.writeFile(global.forecast_file, 'Sunny', function (err) {
+          if (err) {                       
+            console.log(err);
+          }else{ 
+            console.log('Forecast updated to Sunny');
+          }
+        });
+    }
+  }
+
+}, null, true, 'America/Los_Angeles');
+
+// Cron job for updating servo status automatically
+new CronJob('*/5 * * * * *', function() {
+
+  filesystem.readFile(global.forecast_file, 'utf8', function (err,data) {
+    if (err) {
+      return console.log(err);
+    }else{
+      if (S(data).contains('Rain')) {
+	filesystem.writeFile(global.status_file, "true", function (err) {
+	  if (err){
+	    console.log(err);
+	  } else {
+	     console.log('Jemuran dimasukkan');
+	  }
+	});
+      }else{
+	filesystem.writeFile(global.status_file, "false", function (err) {
+          if (err){ 
+            console.log(err);
+          } else { 
+             console.log('Jemuran dikeluarkan');
+          }
+        });
+      }
+    }
   });
 
 }, null, true, 'America/Los_Angeles');
+

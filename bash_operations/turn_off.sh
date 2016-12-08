@@ -1,6 +1,11 @@
-#!/bin/bash
-echo "4" > /sys/class/gpio/export
-echo "out" > /sys/class/gpio/gpio4/direction
-echo "0" > /sys/class/gpio/gpio4/value
-sleep 1
+#!/usr/bin/env python
 
+import RPi.GPIO as GPIO
+import time
+
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(11, GPIO.OUT)
+
+pwm=GPIO.PWM(11, 50)
+pwm.start(10)
+time.sleep(1)

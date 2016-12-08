@@ -37,7 +37,7 @@ router.post('/get_forecast', function(req, res, next){
       res.json({error: true, notification: "file hasn't been initialized"});
       console.dir(err);
     }else{
-      res.json({error: false, forecast: data});
+      res.json({error: false, forecast: data, light_value: global.light_sensor_value, ultrasonic_value: global.ultrasonic_sensor_value});
       console.log("DATA : " + data);
     }
   });
